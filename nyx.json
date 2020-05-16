@@ -1,0 +1,8 @@
+{
+  "name": "Nyx MuOnline",
+  "version": "0.0.1",
+  "windowMode": true,
+  "resolution": "1920x1080",
+  "host": "93.123.16.183",
+  "port": 44405
+}

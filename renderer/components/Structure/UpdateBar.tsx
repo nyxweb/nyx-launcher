@@ -1,34 +1,43 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Context } from '../../context';
+import { commandSender } from '../../utils';
+import store from '../../store';
+import { SET_NOTICE } from '../../store/types';
 
 const UpdateBar = () => {
-  const { state, setState } = useContext(Context);
+  const { state, dispatch } = useContext(store);
   const [total, setTotal] = useState(0);
 
-  // const sendCmd = (cmd: string) => {
-  //   console.log(cmd);
-  // };
-
   useEffect(() => {
-    if (state.updating) {
-      const interval = setInterval(() => {
-        if (total + 1 > 100) {
-          setState({ ...state, updating: false });
-        } else {
-          setTotal(total + 1);
-        }
-      }, 500);
+    const timeout = setTimeout(() => {
+      setTotal(100);
+    }, 500);
 
-      return () => clearInterval(interval);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const updatingNotice = () => {
+    dispatch({
+      type: SET_NOTICE,
+      payload: {
+        open: true,
+        type: 'warning',
+        message: 'Please wait while the clinet is updating.',
+      },
+    });
+  };
+
+  const startGame = () => {
+    if (state.updating) {
+      updatingNotice();
     } else {
-      setTotal(0);
+      commandSender('start-main');
     }
-  }, [total, state.updating]);
+  };
 
   return (
     <Container>
-      <Version>v{state.version}</Version>
+      <Version>v{state.config!.version}</Version>
       <Updater>
         <Title>
           {state.updating
@@ -54,9 +63,7 @@ const UpdateBar = () => {
       </Updater>
       <StartGame>
         <PlayButton
-          onClick={() => {
-            setState({ ...state, updating: !Boolean(state.updating) });
-          }}
+          onClick={startGame}
           className={state.updating ? 'updating' : ''}
         >
           {!state.updating ? 'START' : 'UPDATING'}
@@ -143,6 +150,7 @@ const ProgressFill = styled.div`
   width: 0;
   height: 4px;
   background: #1cc0e6;
+  transition: 1s ease;
 
   &.green {
     background: #1ce68b;
@@ -168,7 +176,6 @@ const PlayButton = styled.div`
     rgba(16, 179, 16, 1) 0%,
     rgba(11, 120, 11, 1) 100%
   );
-  transition: all 0.2s ease-in-out;
   -webkit-app-region: none;
   cursor: pointer;
   color: #004500;
@@ -179,6 +186,10 @@ const PlayButton = styled.div`
       rgba(21, 199, 21, 1) 0%,
       rgba(12, 153, 12, 1) 100%
     );
+  }
+
+  &:active {
+    padding: 2px 0 0 2px;
   }
 
   &.updating {

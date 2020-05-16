@@ -15,5 +15,6 @@
     "isolatedModules": true
   },
   "include": ["renderer/next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "renderer/next.config.js", "app", "dist"]
+  "exclude": ["node_modules", "renderer/next.config.js", "app", "dist"],
+  "files": ["custom.d.ts"]
 }

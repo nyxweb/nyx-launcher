@@ -1,56 +1,50 @@
-import { FC, useEffect, useState, useMemo } from 'react';
+import { FC, useEffect, useReducer, useMemo, useCallback } from 'react';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
-// import { IpcRendererEvent } from 'electron';
+
 import { createGlobalStyle } from 'styled-components';
-import { Context, initialState, AppState } from '../context';
+import Store, { initialState } from '../store';
+import Reducer from '../store/reducer';
+import { commandHandler, commandSender } from '../utils/commands';
+
 import Structure from '../components/Structure';
-import Notice, { INotice } from '../components/ui/Notice';
-import { IpcRendererEvent } from 'electron';
+import Notice from '../components/ui/Notice';
+import AppLoader from '../components/ui/AppLoader';
 
 const App: FC<AppProps> = ({ Component, pageProps }) => {
-  const [state, setState] = useState<AppState>(initialState);
-  const [notice, setNotice] = useState<INotice>({
-    open: true,
-    type: 'error',
-    message: 'Nyx Launcher',
-  });
+  const [appState, appDispatch] = useReducer(Reducer, initialState.state);
 
-  const appState = useMemo(() => ({ state, setState }), [state, setState]);
-
-  const handleNotice = (event: IpcRendererEvent, data: any) => {
-    setNotice(data);
-  };
+  const state = useMemo(() => appState, [appState]);
+  const dispatch = useCallback(appDispatch, [appDispatch]);
 
   useEffect(() => {
-    global.ipcRenderer.on('notice', handleNotice);
+    commandSender('initial-load');
+
+    global.ipcRenderer.on('command', (event, data) =>
+      commandHandler(event, data, dispatch)
+    );
 
     return () => {
-      global.ipcRenderer.off('notice', handleNotice);
+      global.ipcRenderer.off('command', (event, data) =>
+        commandHandler(event, data, dispatch)
+      );
     };
   }, []);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setNotice({ ...notice, open: false });
-    }, 5000);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [notice]);
-
   return (
-    <Context.Provider value={appState}>
+    <Store.Provider value={{ state, dispatch }}>
       <Head>
         <title>Nyx Launcher</title>
       </Head>
       <GlobalStyles />
-      <Notice notice={notice} />
-      <Structure>
-        <Component {...pageProps} />
-      </Structure>
-    </Context.Provider>
+      <AppLoader loading={state.loading} />
+      <Notice />
+      {!state.loading && (
+        <Structure>
+          <Component {...pageProps} />
+        </Structure>
+      )}
+    </Store.Provider>
   );
 };
 
@@ -59,6 +53,11 @@ export default App;
 /* Styles */
 
 const GlobalStyles = createGlobalStyle`
+  @font-face {
+    font-family: Roboto;
+    src: url('/fonts/Roboto-Light.ttf');
+  }
+
   html {
     margin: 0;
     padding: 0;
@@ -76,6 +75,6 @@ const GlobalStyles = createGlobalStyle`
 
   * {
     box-sizing: border-box;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: Roboto, Calibri, sans-serif;
   }
 `;

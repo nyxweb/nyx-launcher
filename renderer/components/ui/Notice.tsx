@@ -1,29 +1,50 @@
-import { FC } from 'react';
+import { useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import { ErrorIcon, Warning, Success, Info } from './Icons';
+import { SET_NOTICE } from '../../store/types';
+import store from '../../store';
 
-export interface INotice {
-  open: boolean;
-  type: 'error' | 'warning' | 'info' | 'success';
-  message: string;
-}
+const Notice = () => {
+  const { state, dispatch } = useContext(store);
+  if (!state.notice) return null;
 
-const Notice: FC<{ notice: INotice }> = ({
-  notice: { open, type, message },
-}) => {
+  const {
+    notice: { open, type, message },
+  } = state;
+
+  const hideNotice = () => {
+    dispatch({
+      type: SET_NOTICE,
+      payload: { ...state.notice, open: false },
+    });
+  };
+
+  const getIcon = () => {
+    switch (type) {
+      case 'error':
+        return <ErrorIcon />;
+      case 'success':
+        return <Success />;
+      case 'warning':
+        return <Warning />;
+      default:
+        return <Info />;
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      const timeout = setTimeout(hideNotice, 10000);
+      return () => clearTimeout(timeout);
+    }
+  }, [state.notice]);
+
   return (
-    <Container className={`${type} ${open ? ' open' : ' closed'}`}>
-      <Icon className={type}>
-        {type === 'error' ? (
-          <ErrorIcon />
-        ) : type === 'success' ? (
-          <Success />
-        ) : type === 'warning' ? (
-          <Warning />
-        ) : (
-          <Info />
-        )}
-      </Icon>
+    <Container
+      className={`${type} ${open ? ' open' : ' closed'}`}
+      onClick={hideNotice}
+    >
+      <Icon className={type}>{getIcon()}</Icon>
       <Text>{message}</Text>
     </Container>
   );
@@ -46,6 +67,7 @@ const Container = styled.div`
   transition: 0.3s ease-in-out;
   font-size: 12px;
   border-radius: 3px;
+  -webkit-app-region: none;
 
   &.closed {
     opacity: 0;
@@ -53,22 +75,22 @@ const Container = styled.div`
 
   &.error {
     color: rgb(250, 179, 174);
-    background-color: rgb(24, 6, 5);
+    background: rgb(24, 6, 5);
   }
 
   &.warning {
     color: rgb(255, 213, 153);
-    background-color: rgb(25, 15, 0);
+    background: rgb(25, 15, 0);
   }
 
   &.info {
     color: rgb(166, 213, 250);
-    background-color: rgb(3, 14, 24);
+    background: rgb(3, 14, 24);
   }
 
   &.success {
     color: rgb(183, 223, 185);
-    background-color: rgb(7, 17, 7);
+    background: rgb(7, 17, 7);
   }
 `;
 

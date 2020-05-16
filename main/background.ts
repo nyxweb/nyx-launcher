@@ -1,12 +1,10 @@
 // Native
-import { execFile } from 'child_process';
 import { join } from 'path';
-import fs from 'fs';
 
 // External
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import serve from 'electron-serve';
-import { createWindow, validateConfig, commandCenter } from './utils';
+import { createWindow, commandHandler } from './utils';
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
@@ -47,45 +45,7 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('command', (event: IpcMainEvent, data) => {
-  commandCenter(event, data, app);
+  commandHandler(event, data, app);
 });
 
-ipcMain.on('startGame', (event: IpcMainEvent) => {
-  execFile(
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    (err) => {
-      if (err) {
-        event.sender.send('notice', 'Woops error', err.message);
-      } else {
-        event.sender.send('notice', 'Success');
-      }
-    }
-  );
-});
-
-ipcMain.on('check-update', (event: IpcMainEvent) => {
-  const filePath = join(app.getAppPath(), 'nyx.json');
-  const defaultConfig = {
-    version: '0.0.1',
-    windowMode: true,
-    resolution: '1920x1080',
-  };
-  let config;
-
-  const createConfig = () => {
-    fs.writeFileSync(filePath, JSON.stringify(defaultConfig, null, 2));
-  };
-
-  try {
-    const fileContents = fs.readFileSync(filePath, { encoding: 'utf8' });
-    config = JSON.parse(fileContents);
-
-    if (!validateConfig(config)) {
-      config = defaultConfig;
-      createConfig();
-    }
-  } catch (error) {
-    config = defaultConfig;
-    createConfig();
-  }
-});
+// '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
