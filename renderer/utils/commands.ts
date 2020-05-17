@@ -1,6 +1,7 @@
 import { Dispatch } from 'react';
 import { IpcRendererEvent } from 'electron';
-import { Action, SET_NOTICE, SET_STATE } from '../store/types';
+import { Action, SET_STATE, ADD_NOTICE } from '../store/types';
+import { v4 as uuid } from 'uuid';
 
 export const commandHandler = (
   _event: IpcRendererEvent,
@@ -12,7 +13,13 @@ export const commandHandler = (
       dispatch({ type: SET_STATE, payload: { ...data, loading: false } });
       break;
     case 'notice':
-      dispatch({ type: SET_NOTICE, payload: data.notice });
+      dispatch({
+        type: ADD_NOTICE,
+        payload: {
+          ...data.notice,
+          id: uuid(),
+        },
+      });
     default:
       break;
   }

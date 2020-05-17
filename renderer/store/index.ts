@@ -5,7 +5,7 @@ export const initialState = {
   state: {
     loading: true,
     updating: null,
-    notice: null,
+    notices: [],
     config: null,
     server: null,
   },

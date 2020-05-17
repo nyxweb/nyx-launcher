@@ -1,25 +1,13 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import styled from 'styled-components';
 import { ErrorIcon, Warning, Success, Info } from './Icons';
-import { SET_NOTICE } from '../../store/types';
+import { REMOVE_NOTICE } from '../../store/types';
 import store from '../../store';
 
 const Notice = () => {
   const { state, dispatch } = useContext(store);
-  if (!state.notice) return null;
 
-  const {
-    notice: { open, type, message },
-  } = state;
-
-  const hideNotice = () => {
-    dispatch({
-      type: SET_NOTICE,
-      payload: { ...state.notice, open: false },
-    });
-  };
-
-  const getIcon = () => {
+  const getIcon = (type: string) => {
     switch (type) {
       case 'error':
         return <ErrorIcon />;
@@ -32,17 +20,21 @@ const Notice = () => {
     }
   };
 
-  useEffect(() => {
-    if (open) {
-      const timeout = setTimeout(hideNotice, 10000);
-      return () => clearTimeout(timeout);
-    }
-  }, [state.notice]);
+  const removeNotice = (id: string) => {
+    dispatch({
+      type: REMOVE_NOTICE,
+      payload: id,
+    });
+  };
 
   return (
-    <Container className={type} onClick={hideNotice}>
-      <Icon className={type}>{getIcon()}</Icon>
-      <Text>{message}</Text>
+    <Container>
+      {state.notices.map(({ id, type, message }) => (
+        <NoticeItem key={id} className={type} onClick={() => removeNotice(id)}>
+          <Icon className={type}>{getIcon(type)}</Icon>
+          <Text>{message}</Text>
+        </NoticeItem>
+      ))}
     </Container>
   );
 };
@@ -53,22 +45,21 @@ export default Notice;
 
 const Container = styled.div`
   position: absolute;
-  width: 300px;
+  top: 75px;
+  right: 5px;
+  display: grid;
+  grid-gap: 10px;
+  width: 320px;
+`;
+
+const NoticeItem = styled.div`
   padding: 15px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  top: 80px;
-  right: 10px;
-  opacity: 1;
-  transition: 0.3s ease-in-out;
   font-size: 12px;
   border-radius: 3px;
   -webkit-app-region: none;
-
-  &.closed {
-    opacity: 0;
-  }
 
   &.error {
     color: rgb(250, 179, 174);

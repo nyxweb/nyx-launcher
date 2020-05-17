@@ -2,7 +2,8 @@ import { useContext, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { commandSender } from '../../utils';
 import store from '../../store';
-import { SET_NOTICE } from '../../store/types';
+import { ADD_NOTICE } from '../../store/types';
+import { v4 as uuid } from 'uuid';
 
 const UpdateBar = () => {
   const { state, dispatch } = useContext(store);
@@ -18,9 +19,9 @@ const UpdateBar = () => {
 
   const updatingNotice = () => {
     dispatch({
-      type: SET_NOTICE,
+      type: ADD_NOTICE,
       payload: {
-        open: true,
+        id: uuid(),
         type: 'warning',
         message: 'Please wait while the clinet is updating.',
       },
@@ -81,7 +82,7 @@ const Container = styled.div`
   position: relative;
   grid-area: updatebar;
   display: grid;
-  grid-template-columns: 70px 1fr 210px;
+  grid-template-columns: 70px 1fr 160px;
   background: rgba(0, 0, 0, 0.45);
 `;
 
@@ -129,7 +130,7 @@ const ProgressWrapper = styled.div`
 const ProgressGroup = styled.div`
   width: 100%;
   display: grid;
-  grid-template-columns: 35px 1fr 35px;
+  grid-template-columns: 40px 1fr 40px;
   align-items: center;
   justify-items: center;
 `;
@@ -164,7 +165,7 @@ const StartGame = styled.div`
 `;
 
 const PlayButton = styled.div`
-  width: 200px;
+  width: 150px;
   height: 50px;
   border-radius: 4px;
   font-size: 20px;

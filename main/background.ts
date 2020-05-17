@@ -5,18 +5,18 @@ import { join } from 'path';
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import serve from 'electron-serve';
 import { createWindow, commandHandler } from './utils';
-import Registry from 'winreg';
+// import Registry from 'winreg';
 
-const registry = new Registry({
-  hive: Registry.HKCU,
-  key: '\\Software\\WebZen\\Mu\\Config',
-});
+// const registry = new Registry({
+//   hive: Registry.HKCU,
+//   key: '\\Software\\WebZen\\Mu\\Config',
+// });
 
-registry.set('UserID', Registry.REG_SZ, 'xaxaxa', (err) => {
-  if (err) {
-    console.log(err.message);
-  }
-});
+// registry.set('UserID', Registry.REG_SZ, 'xaxaxa', (err) => {
+//   if (err) {
+//     console.log(err.message);
+//   }
+// });
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
@@ -31,8 +31,8 @@ if (isProd) {
   app.allowRendererProcessReuse = true;
 
   const mainWindow = createWindow('main', {
-    width: 700,
-    height: 400,
+    width: 550,
+    height: 500,
     frame: false,
     resizable: false,
     transparent: true,
