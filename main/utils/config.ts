@@ -1,5 +1,7 @@
 import { join } from 'path';
 import fs from 'fs';
+import Registry from 'winreg';
+
 import {
   IConfig,
   DEFAULT_CONFIG,
@@ -7,6 +9,7 @@ import {
   DEFAULT_RESOLUTIONS,
   Volume,
   DEFAULT_VOLUMES,
+  MAPPED_REGISTRY_KEYS,
 } from './constants';
 
 const configPath = join(
@@ -14,10 +17,18 @@ const configPath = join(
   'nyx.json'
 );
 
-export const createConfigFile = () => {
-  fs.writeFileSync(configPath, JSON.stringify(DEFAULT_CONFIG, null, 2), {
-    encoding: 'utf8',
-  });
+export const createConfigFile = (config: IConfig | false = false) => {
+  fs.writeFileSync(
+    configPath,
+    JSON.stringify(
+      config && validateConfig(config) ? config : DEFAULT_CONFIG,
+      null,
+      2
+    ),
+    {
+      encoding: 'utf8',
+    }
+  );
 };
 
 export const readConfigFile = () => {
@@ -33,6 +44,45 @@ export const readConfigFile = () => {
   }
 
   return config;
+};
+
+export const updateConfigFile = (data: IConfig) => {
+  try {
+    setConfigRegistry(data);
+
+    const configContents = fs.readFileSync(configPath, { encoding: 'utf8' });
+    const config = validateConfig(JSON.parse(configContents))
+      ? JSON.parse(configContents)
+      : false;
+
+    if (!config) throw new Error();
+
+    createConfigFile({ ...config, ...data });
+  } catch (err) {
+    createConfigFile(data);
+  }
+};
+
+const setConfigRegistry = (config: any) => {
+  const registry = new Registry({
+    hive: Registry.HKCU,
+    key: '\\Software\\WebZen\\Mu\\Config',
+  });
+
+  MAPPED_REGISTRY_KEYS.forEach((obj) =>
+    obj.forEach((reg) => {
+      const value =
+        reg.type === 'REG_SZ'
+          ? config[reg.configName]
+          : config[reg.configName]
+          ? 0x000001
+          : 0x000000;
+
+      registry.set(reg.regName, reg.type, value, (err) => {
+        if (err) console.log(err.message);
+      });
+    })
+  );
 };
 
 // HELPERS

@@ -5,18 +5,6 @@ import { join } from 'path';
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import serve from 'electron-serve';
 import { createWindow, commandHandler } from './utils';
-// import Registry from 'winreg';
-
-// const registry = new Registry({
-//   hive: Registry.HKCU,
-//   key: '\\Software\\WebZen\\Mu\\Config',
-// });
-
-// registry.set('UserID', Registry.REG_SZ, 'xaxaxa', (err) => {
-//   if (err) {
-//     console.log(err.message);
-//   }
-// });
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
@@ -35,7 +23,7 @@ if (isProd) {
     height: 500,
     frame: false,
     resizable: false,
-    transparent: true,
+    backgroundColor: '#000000',
     webPreferences: {
       preload: join(__dirname, '../app/preload.js'),
     },
@@ -59,5 +47,5 @@ app.on('window-all-closed', () => {
 });
 
 ipcMain.on('command', (event: IpcMainEvent, data) => {
-  commandHandler(event, data, app);
+  commandHandler(event, data);
 });

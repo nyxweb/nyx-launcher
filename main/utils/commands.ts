@@ -1,27 +1,28 @@
 // INTERNAL
-import { execFile, exec } from 'child_process';
-import { join } from 'path';
-import portscanner from 'portscanner';
+import { execFile } from 'child_process';
 
 // EXTERNAL
-import { App, IpcMainEvent } from 'electron';
-import { readConfigFile } from './config';
-import { DEFAULT_CONFIG } from './constants';
+import portscanner from 'portscanner';
+import { IpcMainEvent } from 'electron';
+import { readConfigFile, updateConfigFile } from './config';
+import { DEFAULT_CONFIG, IConfig } from './constants';
 
-export const commandHandler = (event: IpcMainEvent, data: any, app: App) => {
+export const commandHandler = (event: IpcMainEvent, data: any) => {
   switch (data.type) {
     case 'initial-load':
-      initialLoad(event, app);
+      initialLoad(event);
       break;
     case 'start-main':
-      startMain(event, app);
+      startMain(event);
       break;
+    case 'update-config':
+      updateConfig(event, data.data);
     default:
       break;
   }
 };
 
-const initialLoad = async (event: IpcMainEvent, app: App) => {
+const initialLoad = async (event: IpcMainEvent) => {
   const config = readConfigFile() || DEFAULT_CONFIG;
   global.config = config;
 
@@ -32,7 +33,7 @@ const initialLoad = async (event: IpcMainEvent, app: App) => {
   });
 };
 
-const startMain = (event: IpcMainEvent, app: App) => {
+const startMain = (event: IpcMainEvent) => {
   execFile(
     `main.exe`,
     // [`connect`, `/u${host} /p${port}`],
@@ -51,6 +52,11 @@ const startMain = (event: IpcMainEvent, app: App) => {
       }
     }
   );
+};
+
+const updateConfig = (event: IpcMainEvent, config: IConfig) => {
+  updateConfigFile(config);
+  global.config = { ...global.config, ...config };
 };
 
 const checkServerStatus = async () => {

@@ -42,3 +42,13 @@ export const DEFAULT_CONFIG: IConfig = {
   host: '127.0.0.1',
   port: 44405,
 };
+
+export const MAPPED_REGISTRY_KEYS = [
+  [
+    { configName: 'userId', regName: 'UserId', type: 'REG_SZ' },
+    { configName: 'userId', regName: 'ID', type: 'REG_SZ' },
+  ],
+  [{ configName: 'windowMode', regName: 'WindowMode', type: 'REG_DWORD' }],
+  [{ configName: 'sound', regName: 'SoundOn', type: 'REG_DWORD' }],
+  [{ configName: 'music', regName: 'SoundOnOff', type: 'REG_DWORD' }],
+];

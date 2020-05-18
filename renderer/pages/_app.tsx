@@ -21,7 +21,6 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
     commandSender('initial-load');
 
     global.ipcRenderer.on('command', (event, data) => {
-      console.log(data);
       commandHandler(event, data, dispatch);
     });
 

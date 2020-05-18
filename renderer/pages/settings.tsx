@@ -1,52 +1,130 @@
+import { useState, useContext } from 'react';
 import styled from 'styled-components';
+import store from '../store';
+import { commandSender } from '../utils';
+import { ADD_NOTICE, SET_CONFIG } from '../store/types';
 
 const Settings = () => {
+  const { state, dispatch } = useContext(store);
+  const [settings, setSettings] = useState<any>(state.config);
+
+  const typer = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (settings && settings[e.target.name]) {
+      setSettings({
+        ...settings,
+        [e.target.name]: e.target.value,
+      });
+    }
+  };
+
+  const saveChanges = () => {
+    commandSender('update-config', settings);
+
+    dispatch({
+      type: SET_CONFIG,
+      payload: { ...state.config, ...settings },
+    });
+
+    dispatch({
+      type: ADD_NOTICE,
+      payload: {
+        type: 'success',
+        message: `Settings saved`,
+      },
+    });
+  };
+
   return (
     <Container>
-      <Title>Settings</Title>
-      <FieldsArea>
-        <Row>
-          <div>Username</div>
-          <div>
-            <input type='text' />
-          </div>
-        </Row>
-        <Row>
-          <div>Resolution</div>
-          <div>
-            <select>
-              <option>640x480</option>
-              <option>800x600</option>
-              <option>1024x768</option>
-              <option>1280x1024</option>
-              <option>1920x1080</option>
-            </select>
-          </div>
-        </Row>
-        <Row>
-          <div>Sound</div>
-          <div>
-            <input type='checkbox' />
-          </div>
-        </Row>
-        <Row>
-          <div>Music</div>
-          <div>
-            <input type='checkbox' />
-          </div>
-        </Row>
-        <Row>
-          <div>Window Mode</div>
-          <div>
-            <input type='checkbox' />
-          </div>
-        </Row>
-        <Row>
-          <div>
-            <button>Save Changes</button>
-          </div>
-        </Row>
-      </FieldsArea>
+      {!settings ? (
+        `Loading...`
+      ) : (
+        <>
+          <Title>Settings</Title>
+          <FieldsArea>
+            <Row>
+              <div>Server Name</div>
+              <div>
+                <input
+                  type='text'
+                  name='name'
+                  value={settings.name}
+                  onChange={typer}
+                />
+              </div>
+            </Row>
+            <Row>
+              <div>Username</div>
+              <div>
+                <input
+                  type='text'
+                  name='userId'
+                  value={settings.userId}
+                  onChange={typer}
+                />
+              </div>
+            </Row>
+            <Row>
+              <div>Resolution</div>
+              <div>
+                <select
+                  defaultValue={settings.resolution}
+                  onChange={(e) =>
+                    setSettings({ ...settings, resolution: e.target.value })
+                  }
+                >
+                  <option>640x480</option>
+                  <option>800x600</option>
+                  <option>1024x768</option>
+                  <option>1280x1024</option>
+                  <option>1920x1080</option>
+                </select>
+              </div>
+            </Row>
+            <Row>
+              <div>Sound</div>
+              <div>
+                <input
+                  type='checkbox'
+                  onChange={(e) => {
+                    setSettings({ ...settings, sound: e.target.checked });
+                  }}
+                  checked={settings.sound}
+                />
+              </div>
+            </Row>
+            <Row>
+              <div>Music</div>
+              <div>
+                <input
+                  type='checkbox'
+                  onChange={(e) => {
+                    setSettings({ ...settings, music: e.target.checked });
+                  }}
+                  checked={settings.music}
+                />
+              </div>
+            </Row>
+            <Row>
+              <div>Window Mode</div>
+              <div>
+                <input
+                  type='checkbox'
+                  onChange={(e) => {
+                    setSettings({ ...settings, windowMode: e.target.checked });
+                  }}
+                  checked={settings.windowMode}
+                />
+              </div>
+            </Row>
+            <Row>
+              <div>
+                <button onClick={saveChanges}>Save Changes</button>
+              </div>
+            </Row>
+          </FieldsArea>
+        </>
+      )}
     </Container>
   );
 };
