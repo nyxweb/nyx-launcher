@@ -1,12 +1,24 @@
 import styled from 'styled-components';
 import Link from 'next/link';
 import { Close, Minus as Minimize, SettingsSolid } from '../ui/Icons';
-import { remote } from 'electron';
+import electron from 'electron';
 import { useContext } from 'react';
 import store from '../../store';
 
 const Toolbar = () => {
   const { state } = useContext(store);
+
+  const closeApp = () => {
+    if (electron.remote) {
+      electron.remote.app.exit(0);
+    }
+  };
+
+  const minimuzeApp = () => {
+    if (electron.remote) {
+      electron.remote.BrowserWindow.getFocusedWindow()?.minimize();
+    }
+  };
 
   return (
     <Container>
@@ -22,18 +34,10 @@ const Toolbar = () => {
         </Title>
       </Link>
       <Buttons>
-        <IconWrapper
-          background='#ff5750'
-          color='#aa0e0d'
-          onClick={() => remote.app.exit(0)}
-        >
+        <IconWrapper background='#ff5750' color='#aa0e0d' onClick={closeApp}>
           <Close />
         </IconWrapper>
-        <IconWrapper
-          background='#ffbf2e'
-          color='#995700'
-          onClick={() => remote.BrowserWindow.getFocusedWindow()?.minimize()}
-        >
+        <IconWrapper background='#ffbf2e' color='#995700' onClick={minimuzeApp}>
           <Minimize />
         </IconWrapper>
         <Link href='/settings'>

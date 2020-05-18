@@ -20,9 +20,10 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
   useEffect(() => {
     commandSender('initial-load');
 
-    global.ipcRenderer.on('command', (event, data) =>
-      commandHandler(event, data, dispatch)
-    );
+    global.ipcRenderer.on('command', (event, data) => {
+      console.log(data);
+      commandHandler(event, data, dispatch);
+    });
 
     return () => {
       global.ipcRenderer.off('command', (event, data) =>

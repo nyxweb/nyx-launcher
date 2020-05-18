@@ -40,10 +40,7 @@ const Notice = () => {
   }, [state.notice]);
 
   return (
-    <Container
-      className={`${type} ${open ? ' open' : ' closed'}`}
-      onClick={hideNotice}
-    >
+    <Container className={type} onClick={hideNotice}>
       <Icon className={type}>{getIcon()}</Icon>
       <Text>{message}</Text>
     </Container>

@@ -1,14 +1,18 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import Toolbar from './Toolbar';
 import UpdateBar from './UpdateBar';
+import RssFeed from './RssFeed';
 
 const Structure: FC = ({ children }) => {
   return (
     <Wrapper>
       <Toolbar />
-      <Content>{children}</Content>
+      <ContentArea>
+        <Content>{children}</Content>
+        <RssFeed />
+      </ContentArea>
       <UpdateBar />
     </Wrapper>
   );
@@ -32,9 +36,15 @@ const Wrapper = styled.main`
   -webkit-app-region: drag;
 `;
 
-const Content = styled.div`
+const ContentArea = styled.div`
   grid-area: content;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  padding: 10px;
+  grid-gap: 10px;
+`;
+
+const Content = styled.div`
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 5px;
 `;

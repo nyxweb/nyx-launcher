@@ -1,5 +1,5 @@
 // INTERNAL
-import { execFile } from 'child_process';
+import { execFile, exec } from 'child_process';
 import { join } from 'path';
 import portscanner from 'portscanner';
 
@@ -22,34 +22,35 @@ export const commandHandler = (event: IpcMainEvent, data: any, app: App) => {
 };
 
 const initialLoad = async (event: IpcMainEvent, app: App) => {
-  const configFile = readConfigFile(app);
-  const config = configFile || DEFAULT_CONFIG;
+  const config = readConfigFile() || DEFAULT_CONFIG;
   global.config = config;
 
   event.sender.send('command', {
     type: 'initial-load',
-    config: { ...config, type: !!configFile },
+    config,
     server: await checkServerStatus(),
   });
 };
 
 const startMain = (event: IpcMainEvent, app: App) => {
-  const configPath = join(app.getAppPath(), 'main.exe');
-  const { host, port } = global.config;
-
-  // '/Applications/Visual Studio Code.app/Contents/MacOS/Electron', ['-g', configPath]
-  execFile(configPath, ['connect', `/u${host} /p${port}`], (err) => {
-    if (err) {
-      event.sender.send('command', {
-        type: 'notice',
-        notice: {
-          open: true,
-          type: 'error',
-          message: 'Could not find executable main.exe',
-        },
-      });
+  execFile(
+    `main.exe`,
+    // [`connect`, `/u${host} /p${port}`],
+    { cwd: process.env.PORTABLE_EXECUTABLE_DIR },
+    (err) => {
+      if (err) {
+        event.sender.send('command', {
+          type: 'notice',
+          notice: {
+            type: 'error',
+            message: /eacces/i.test(err.message)
+              ? 'You need to run the Launcher as Administrator'
+              : 'Could not find executable main.exe',
+          },
+        });
+      }
     }
-  });
+  );
 };
 
 const checkServerStatus = async () => {

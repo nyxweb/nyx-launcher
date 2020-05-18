@@ -4,3 +4,5 @@ namespace NodeJS {
     config: import('./main/utils/config').IConfig;
   }
 }
+
+// declare module 'regedit';

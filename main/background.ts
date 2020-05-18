@@ -5,6 +5,18 @@ import { join } from 'path';
 import { app, ipcMain, IpcMainEvent } from 'electron';
 import serve from 'electron-serve';
 import { createWindow, commandHandler } from './utils';
+import Registry from 'winreg';
+
+const registry = new Registry({
+  hive: Registry.HKCU,
+  key: '\\Software\\WebZen\\Mu\\Config',
+});
+
+registry.set('UserID', Registry.REG_SZ, 'xaxaxa', (err) => {
+  if (err) {
+    console.log(err.message);
+  }
+});
 
 const isProd: boolean = process.env.NODE_ENV === 'production';
 
@@ -19,10 +31,11 @@ if (isProd) {
   app.allowRendererProcessReuse = true;
 
   const mainWindow = createWindow('main', {
-    width: 1000,
-    height: 700,
+    width: 700,
+    height: 400,
     frame: false,
     resizable: false,
+    transparent: true,
     webPreferences: {
       preload: join(__dirname, '../app/preload.js'),
     },
@@ -30,10 +43,11 @@ if (isProd) {
 
   if (isProd) {
     await mainWindow.loadURL('app://./index.html');
+    // mainWindow.webContents.openDevTools();
 
-    mainWindow.webContents.on('devtools-opened', () => {
-      mainWindow.webContents.closeDevTools();
-    });
+    // mainWindow.webContents.on('devtools-opened', () => {
+    //   mainWindow.webContents.closeDevTools();
+    // });
   } else {
     const port = process.argv[2];
     await mainWindow.loadURL(`http://localhost:${port}`);
@@ -47,5 +61,3 @@ app.on('window-all-closed', () => {
 ipcMain.on('command', (event: IpcMainEvent, data) => {
   commandHandler(event, data, app);
 });
-
-// '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';

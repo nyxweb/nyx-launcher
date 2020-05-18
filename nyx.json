@@ -1,8 +1,12 @@
 {
   "name": "Nyx MuOnline",
   "version": "0.0.1",
+  "userId": "",
   "windowMode": true,
-  "resolution": "1920x1080",
-  "host": "93.123.16.183",
+  "resolution": "1024x768",
+  "sound": true,
+  "music": false,
+  "volume": 3,
+  "host": "127.0.0.1",
   "port": 44405
 }
